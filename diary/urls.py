@@ -4,9 +4,9 @@ from . import views
 app_name = 'diary'
 
 urlpatterns = [
-    path('', views.index, name='index'),  # /diary
-    path('add/', views.add, name='add'),  # /diary/add
-    path('update/<int:pk>/', views.update, name='update'),  # diary/update/1
-    path('delete/<int:pk>/', views.delete, name='delete'),  # /diary/delete/1
-    path('detail/<int:pk>/', views.detail, name='detail'),  # /diary/detail/1
+    path('', views.IndexView.as_view(), name='index'),  # /diary
+    path('add/', views.CreateView.as_view(), name='add'),  # /diary/add
+    path('update/<int:pk>/', views.UpdateView.as_view(), name='update'),  # diary/update/1
+    path('delete/<int:pk>/', views.DeleteView.as_view(), name='delete'),  # /diary/delete/1
+    path('detail/<int:pk>/', views.DetailView.as_view(), name='detail'),  # /diary/detail/1
 ]
