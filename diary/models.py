@@ -9,6 +9,21 @@ class Day(models.Model):
     date = models.DateTimeField('日付', default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     
+    @property
+    def has_reviewer_comments(self):
+        """レビュアーからのコメントがあるかどうかをチェック"""
+        return self.comments.filter(author__in=self.get_reviewers()).exists()
+    
+    @property
+    def reviewers(self):
+        """この日記のレビュアーを取得"""
+        return User.objects.filter(review_permissions__diary_owner=self.author)
+    
+    @property
+    def is_reviewed(self):
+        """レビュー済みかどうか（レビュアーからのコメントがある場合）"""
+        return self.has_reviewer_comments
+    
     # オブジェクトの文字列表現を定義するために使用
     # day = Day.objects.first()が"タイトル" のように表示される
     def __str__(self):
