@@ -134,30 +134,44 @@ def add_comment_htmx(request, day_id):
 def manage_reviewers(request):
     """レビュアー管理ページ"""
     my_reviewers = get_my_reviewers(request.user)
-    
-    if request.method == 'POST':
-        form = ReviewerAddForm(request.POST, diary_owner=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'レビュアーを追加しました。')
-            return redirect('diary:manage_reviewers')
-    else:
-        form = ReviewerAddForm(diary_owner=request.user)
+    form = ReviewerAddForm(diary_owner=request.user)
     
     return render(request, 'diary/manage_reviewers.html', {
         'form': form,
         'reviewers': my_reviewers
     })
 
+@login_required
+def add_reviewer_htmx(request):
+    """HTMXを使用したレビュアー追加機能"""
+    if request.method == 'POST':
+        form = ReviewerAddForm(request.POST, diary_owner=request.user)
+        if form.is_valid():
+            form.save()
+            # 成功時は空のフォームを返す
+            new_form = ReviewerAddForm(diary_owner=request.user)
+            return render(request, 'diary/partials/reviewer_form.html', {
+                'form': new_form
+            })
+        else:
+            # エラー時はエラー付きフォームを返す
+            return render(request, 'diary/partials/reviewer_form.html', {
+                'form': form
+            })
+    
+    return HttpResponse(status=405)
+
 
 @login_required
-def delete_reviewer(request, reviewer_id):
-    """レビュアー削除"""
-    reviewer = get_object_or_404(Reviewer, id=reviewer_id, diary_owner=request.user)
-    reviewer.delete()
-    messages.success(request, f'{reviewer.reviewer.username}をレビュアーから削除しました。')
-    return redirect('diary:manage_reviewers')
-
+def delete_reviewer_htmx(request, reviewer_id):
+    """HTMXを使用したレビュアー削除機能"""
+    if request.method == 'DELETE':
+        reviewer = get_object_or_404(Reviewer, id=reviewer_id, diary_owner=request.user)
+        reviewer.delete()
+        # 削除成功時は空のレスポンスを返す（要素が削除される）
+        return HttpResponse("")
+    
+    return HttpResponse(status=405)
 
 @login_required
 def review_list(request):
