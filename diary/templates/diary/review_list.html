@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-10">
+    <h2>レビュー可能な日記</h2>
+    
+    {% if day_list %}
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>タイトル</th>
+            <th>作成者</th>
+            <th>日付</th>
+            <th>コメント数</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for day in day_list %}
+          <tr>
+            <td>review_list
+              <a href="{% url 'diary:detail' day.pk %}" class="text-decoration-none">
+                {{ day.title }}
+              </a>
+            </td>
+            <td>{{ day.author.username }}</td>
+            <td>{{ day.date|date:"Y-m-d H:i" }}</td>
+            <td>
+              <span class="badge badge-secondary">{{ day.comments.count }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="alert alert-info">
+        <h5>レビュー可能な日記がありません</h5>
+        <p>まだレビュアーとして指定されていません。日記作成者にレビュアー登録を依頼してください。</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

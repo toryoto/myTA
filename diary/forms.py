@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Day, Reviewer
+from .models import Day, Reviewer, Comment
 
 
 class DayCreateForm(forms.ModelForm):
@@ -48,3 +48,18 @@ class ReviewerAddForm(forms.Form):
         username = self.cleaned_data['username']
         user = User.objects.get(username=username)
         return Reviewer.objects.create(diary_owner=self.diary_owner, reviewer=user)
+    
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ('text',)
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'コメントを入力してください...'
+            })
+        }
+        labels = {
+            'text': 'コメント'
+        }

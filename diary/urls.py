@@ -11,4 +11,5 @@ urlpatterns = [
     path('detail/<int:pk>/', views.DetailView.as_view(), name='detail'),  # /diary/detail/1
     path('reviewers/', views.manage_reviewers, name='manage_reviewers'),  # /diary/reviewers/
     path('reviewers/delete/<int:reviewer_id>/', views.delete_reviewer, name='delete_reviewer'),  # /diary/reviewers/delete/1/
+    path('review/', views.review_list, name='review'),  # /diary/review/
 ]

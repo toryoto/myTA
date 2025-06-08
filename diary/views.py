@@ -1,12 +1,14 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from .forms import DayCreateForm, ReviewerAddForm
-from .models import Day, Reviewer
-from .utils import get_my_reviewers
+from .forms import DayCreateForm, ReviewerAddForm, CommentForm
+from .models import Day, Reviewer, Comment
+from .utils import get_my_reviewers, get_reviewable_days, can_comment_on_day
 from django.views import generic
 from django.urls import reverse_lazy
+from django.db.models import Q
 
 
 class IndexView(LoginRequiredMixin, generic.ListView):
@@ -17,14 +19,65 @@ class IndexView(LoginRequiredMixin, generic.ListView):
     def get_queryset(self):
         return Day.objects.filter(author=self.request.user)
 
-
+    
 class DetailView(LoginRequiredMixin, generic.DetailView):
     model = Day
     template_name = 'diary/day_detail.html'
     context_object_name = 'day'
-
+    
     def get_queryset(self):
-        return Day.objects.filter(author=self.request.user)
+        user = self.request.user
+        # Qオブジェクトを使用することで、OR条件を一つのクエリで表現することができるようになる
+        # distinct()がないと、レビュアーと投稿者の条件により同じデータを複数取得してしまう
+        return Day.objects.filter(
+            Q(author=user) | Q(author__granted_reviewers__reviewer=user)
+        ).distinct()
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        day = self.get_object()
+        user = self.request.user
+        
+        # ユーザーの権限を判定
+        is_owner = day.author == user
+        is_reviewer = can_comment_on_day(user, day)
+        
+        # アクセス権限チェック
+        if not (is_owner or is_reviewer):
+            return context  # エラーは後でハンドリング
+        
+        # コメント一覧（返信でないもの）
+        comments = Comment.objects.filter(day=day, reply_to__isnull=True)
+        
+        # コメントフォーム（レビュアーのみ）
+        comment_form = CommentForm() if is_reviewer else None
+        
+        context.update({
+            'comments': comments,
+            'comment_form': comment_form,
+            'is_owner': is_owner,
+            'is_reviewer': is_reviewer,
+        })
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        """コメント投稿処理"""
+        day = self.get_object()
+        
+        # レビュー権限チェック
+        if not can_comment_on_day(request.user, day):
+            messages.error(request, 'この日記にコメントする権限がありません。')
+            return redirect('diary:detail', pk=day.pk)
+        
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.day = day
+            comment.author = request.user
+            comment.save()
+            messages.success(request, 'コメントを投稿しました。')
+        
+        return redirect('diary:detail', pk=day.pk)
 
 
 class CreateView(LoginRequiredMixin, generic.CreateView):
@@ -85,6 +138,15 @@ def delete_reviewer(request, reviewer_id):
     reviewer.delete()
     messages.success(request, f'{reviewer.reviewer.username}をレビュアーから削除しました。')
     return redirect('diary:manage_reviewers')
+
+
+@login_required
+def review_list(request):
+    """レビューページ - コメント可能な日記一覧"""
+    reviewable_days = get_reviewable_days(request.user)
+    return render(request, 'diary/review_list.html', {
+        'day_list': reviewable_days
+    })
 
 
 
