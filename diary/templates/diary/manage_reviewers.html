@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <h2>レビュアー管理</h2>
+
+    <!-- メッセージ表示 -->
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+          </button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- レビュアー追加フォーム -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5>レビュアーを追加</h5>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {% if form.username.errors %}
+              <div class="text-danger">
+                {{ form.username.errors }}
+              </div>
+            {% endif %}
+          </div>
+          <button type="submit" class="btn btn-primary">追加</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 現在のレビュアー一覧 -->
+    <div class="card">
+      <div class="card-header">
+        <h5>現在のレビュアー</h5>
+      </div>
+      <div class="card-body">
+        {% if reviewers %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ユーザー名</th>
+                <th>追加日時</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for reviewer in reviewers %}
+              <tr>
+                <td>{{ reviewer.reviewer.username }}</td>
+                <td>{{ reviewer.granted_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                  <a href="{% url 'diary:delete_reviewer' reviewer.id %}" 
+                     class="btn btn-sm btn-danger"
+                     onclick="return confirm('本当に削除しますか？')">削除</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="text-muted">まだレビュアーが登録されていません。</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <a href="{% url 'diary:index' %}" class="btn btn-secondary">日記一覧に戻る</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
