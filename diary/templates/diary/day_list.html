@@ -1,25 +1,91 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>日記一覧</h1>
-<table class="table">
-  <thead>
-    <tr>
-      <th>タイトル</th>
-      <th>日付</th>
-      <th>#</th>
-      <th>#</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for day in day_list %}
-    <tr>
-      <td><a href="{% url 'diary:detail' day.pk %}">{{ day.title }}</a></td>
-      <td>{{ day.date }}</td>
-      <td><a href="{% url 'diary:update' day.pk %}">更新</a></td>
-      <td><a href="{% url 'diary:delete' day.pk %}">削除</a></td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
+<div class="space-y-6">
+  <!-- ページヘッダー -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">日記一覧</h1>
+      <p class="mt-2 text-gray-600">あなたの日記エントリ一覧</p>
+    </div>
+    <a href="{% url 'diary:add' %}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      新しい日記を追加
+    </a>
+  </div>
+
+  {% if day_list %}
+    <!-- 日記カードリスト -->
+    <div class="grid gap-4">
+      {% for day in day_list %}
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+        <div class="p-6">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                <a href="{% url 'diary:detail' day.pk %}" class="hover:text-primary-600 transition-colors">
+                  {{ day.title }}
+                </a>
+              </h3>
+              <div class="flex items-center text-sm text-gray-500 mb-3">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                {{ day.date|date:"Y年m月d日 H:i" }}
+              </div>
+              {% if day.text %}
+                <p class="text-gray-600 text-sm line-clamp-2">
+                  {{ day.text|truncatewords:30 }}
+                </p>
+              {% endif %}
+            </div>
+            
+            <!-- アクションボタン -->
+            <div class="flex items-center space-x-2 ml-4">
+              <a href="{% url 'diary:detail' day.pk %}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                詳細
+              </a>
+              <a href="{% url 'diary:update' day.pk %}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                編集
+              </a>
+              <a href="{% url 'diary:delete' day.pk %}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                削除
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <!-- 空の状態 -->
+    <div class="text-center py-12">
+      <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">まだ日記がありません</h3>
+      <p class="text-gray-500 mb-6">最初の日記を書いて、記録を始めましょう。</p>
+      <a href="{% url 'diary:add' %}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        最初の日記を作成
+      </a>
+    </div>
+  {% endif %}
+</div>
 {% endblock %}
