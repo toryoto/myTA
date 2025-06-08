@@ -43,8 +43,8 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button hx-delete="{% url 'diary:delete_reviewer_htmx' reviewer.id %}"
-                          hx-target="#reviewer-{{ reviewer.id }}"
-                          hx-swap="outerHTML"
+                          hx-target="#reviewer-list-section"
+                          hx-swap="innerHTML"
                           hx-confirm="{{ reviewer.reviewer.username }}をレビュアーから削除しますか？"
                           class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

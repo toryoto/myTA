@@ -2,7 +2,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib import messages
 from .forms import DayCreateForm, ReviewerAddForm, CommentForm
 from .models import Day, Reviewer, Comment
 from .utils import get_my_reviewers, get_reviewable_days, can_comment_on_day
@@ -10,6 +9,8 @@ from django.views import generic
 from django.urls import reverse_lazy
 from django.db.models import Q
 from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.middleware.csrf import get_token
 
 
 class IndexView(LoginRequiredMixin, generic.ListView):
@@ -148,13 +149,32 @@ def add_reviewer_htmx(request):
         form = ReviewerAddForm(request.POST, diary_owner=request.user)
         if form.is_valid():
             form.save()
-            # 成功時は空のフォームを返す
+            # 成功時は新しい空のフォームとレビュアーリストの両方を更新
             new_form = ReviewerAddForm(diary_owner=request.user)
-            return render(request, 'diary/partials/reviewer_form.html', {
+            my_reviewers = get_my_reviewers(request.user)
+            
+            # フォーム部分とリスト部分を含むHTMLを構築
+            # out-of-band更新でレビュアーリストも同時に更新
+            form_html = render_to_string('diary/partials/reviewer_form.html', {
                 'form': new_form
-            })
+            }, request=request)
+            
+            list_html = render_to_string('diary/partials/reviewer_list.html', {
+                'reviewers': my_reviewers,
+                'csrf_token': get_token(request)
+            }, request=request)
+            
+            # メインのレスポンス（フォーム部分）とout-of-band更新（リスト部分）
+            response_html = f'''
+                {form_html}
+                <div id="reviewer-list-section" hx-swap-oob="innerHTML">
+                    {list_html}
+                </div>
+            '''
+            
+            return HttpResponse(response_html)
         else:
-            # エラー時はエラー付きフォームを返す
+            # エラー時はフォーム部分のみを更新
             return render(request, 'diary/partials/reviewer_form.html', {
                 'form': form
             })
@@ -166,10 +186,23 @@ def add_reviewer_htmx(request):
 def delete_reviewer_htmx(request, reviewer_id):
     """HTMXを使用したレビュアー削除機能"""
     if request.method == 'DELETE':
+        csrf_token = request.META.get('HTTP_X_CSRFTOKEN')
+        if not csrf_token:
+            return HttpResponse(status=403)
+            
         reviewer = get_object_or_404(Reviewer, id=reviewer_id, diary_owner=request.user)
         reviewer.delete()
-        # 削除成功時は空のレスポンスを返す（要素が削除される）
-        return HttpResponse("")
+        
+        # 削除後の最新のレビュアーリストを取得
+        updated_reviewers = get_my_reviewers(request.user)
+        
+        # リスト全体を更新
+        list_html = render_to_string('diary/partials/reviewer_list.html', {
+            'reviewers': updated_reviewers,
+            'csrf_token': get_token(request)
+        }, request=request)
+        
+        return HttpResponse(list_html)
     
     return HttpResponse(status=405)
 
@@ -180,63 +213,3 @@ def review_list(request):
     return render(request, 'diary/review_list.html', {
         'day_list': reviewable_days
     })
-
-
-
-
-# def index(request):
-#     context = {
-#         'day_list': Day.objects.all(),
-#     }
-#     return render(request, 'diary/day_list.html', context)
-
-
-# def add(request):
-#     form = DayCreateForm(request.POST or None)
-    
-#     if request.method == 'POST' and form.is_valid():
-#         form.save()
-#         return redirect('diary:index')
-    
-#     context = {
-#         'form': form
-#     }
-#     return render(request, 'diary/day_form.html', context)
-
-
-# def update(request, pk):
-#     day = get_object_or_404(Day, pk=pk)
-
-#     # instanceでformの初期値を設定する
-#     form = DayCreateForm(request.POST or None, instance=day)
-
-#     if request.method == 'POST' and form.is_valid():
-#         form.save()
-#         return redirect('diary:index')
-    
-#     context = {
-#         'form': form
-#     }
-#     return render(request, 'diary/day_form.html', context) 
-
-
-# def delete(request, pk):
-#     day = get_object_or_404(Day, pk=pk)
-
-#     if request.method == 'POST':
-#         day.delete()
-#         return redirect('diary:index')
-    
-#     context = {
-#         'day': day,
-#     }
-#     return render(request, 'diary/day_confirm_delete.html', context) 
-
-
-# def detail(request, pk):
-#     day = get_object_or_404(Day, pk=pk)
-
-#     context = {
-#         'day': day,
-#     }
-#     return render(request, 'diary/day_detail.html', context) 

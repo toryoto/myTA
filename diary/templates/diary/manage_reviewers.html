@@ -17,11 +17,6 @@
     </a>
   </div>
 
-  <!-- メッセージ表示 -->
-  {% comment %} <div id="messages-section">
-    {% include 'diary/partials/messages.html' %}
-  </div> {% endcomment %}
-
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- レビュアー追加フォーム -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -35,9 +30,9 @@
       </div>
       <div class="px-6 py-6">
         <form hx-post="{% url 'diary:add_reviewer_htmx' %}"
-              hx-target="#reviewer-form-section"
-              hx-swap="innerHTML"
-              class="space-y-4">
+          hx-target="#reviewer-form-section"
+          hx-swap="innerHTML"
+          class="space-y-4">
           {% csrf_token %}
           <div id="reviewer-form-section">
             {% include 'diary/partials/reviewer_form.html' %}
@@ -76,4 +71,17 @@
     {% include 'diary/partials/reviewer_list.html' %}
   </div>
 </div>
+
+<!-- CSRFトークンを取得するためのJavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // CSRFトークンを取得してHTMXリクエストに設定
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // HTMXの設定でCSRFトークンを全てのリクエストに含める
+    document.body.addEventListener('htmx:configRequest', function(event) {
+        event.detail.headers['X-CSRFToken'] = csrfToken;
+    });
+});
+</script>
 {% endblock %}
