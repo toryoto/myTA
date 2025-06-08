@@ -10,6 +10,7 @@ class SignUpView(generic.CreateView):
     template_name = 'accounts/signup.html'
     success_url = reverse_lazy('diary:index')
 
+    # クライアントのformがPOSTメソッドで送信され、かつフォームのバリデーションが成功すると自動で実行される
     def form_valid(self, form):
         response = super().form_valid(form)
         login(self.request, self.object)
