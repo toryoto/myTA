@@ -11,6 +11,7 @@ urlpatterns = [
     path('detail/<int:pk>/', views.DetailView.as_view(), name='detail'),  # /diary/detail/1
     path('reviewers/', views.manage_reviewers, name='manage_reviewers'),  # /diary/reviewers/
     path('review/', views.review_list, name='review'),  # /diary/review/
+    path('review/archive/', views.review_archive, name='review_archive'),  # /diary/review/archive/
     # HTMX用のURL
     path('htmx/comment/<int:day_id>/', views.add_comment_htmx, name='add_comment_htmx'),  # /diary/htmx/comment/1/
     path('htmx/reviewer/add/', views.add_reviewer_htmx, name='add_reviewer_htmx'),  # /diary/htmx/reviewer/add/

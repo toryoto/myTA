@@ -1,10 +1,9 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import DayCreateForm, ReviewerAddForm, CommentForm
 from .models import Day, Reviewer, Comment
-from .utils import get_my_reviewers, get_reviewable_days, can_comment_on_day
+from .utils import get_my_reviewers, get_reviewable_days, get_reviewed_days, can_comment_on_day
 from django.views import generic
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -51,8 +50,13 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
         # コメント一覧（返信でないもの）
         comments = Comment.objects.filter(day=day, reply_to__isnull=True)
         
-        # コメントフォーム（レビュアーのみ）
-        comment_form = CommentForm() if is_reviewer else None
+        # コメントフォーム（レビュアーかつ未レビューの場合のみ）
+        comment_form = None
+        if is_reviewer:
+            # 自分がまだコメントしていない場合のみフォームを表示
+            has_commented = Comment.objects.filter(day=day, author=user).exists()
+            if not has_commented:
+                comment_form = CommentForm()
         
         context.update({
             'comments': comments,
@@ -101,6 +105,10 @@ def add_comment_htmx(request, day_id):
     if not can_comment_on_day(request.user, day):
         return HttpResponse("<div class='text-red-500'>コメントする権限がありません</div>", status=403)
     
+    # 既にコメント済みかチェック
+    if Comment.objects.filter(day=day, author=request.user).exists():
+        return HttpResponse("<div class='text-red-500'>既にこの日記にコメント済みです</div>", status=400)
+    
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -111,11 +119,10 @@ def add_comment_htmx(request, day_id):
             
             # 新しいコメント一覧を返す（返信でないもののみ）
             comments = Comment.objects.filter(day=day, reply_to__isnull=True)
-            comment_form = CommentForm()
             
             return render(request, 'diary/partials/comment_section.html', {
                 'comments': comments,
-                'comment_form': comment_form,
+                'comment_form': form,
                 'day': day,
                 'is_reviewer': True
             })
@@ -208,8 +215,16 @@ def delete_reviewer_htmx(request, reviewer_id):
 
 @login_required
 def review_list(request):
-    """レビューページ - コメント可能な日記一覧"""
+    """レビューページ - コメント可能な日記一覧（未レビューのみ）"""
     reviewable_days = get_reviewable_days(request.user)
     return render(request, 'diary/review_list.html', {
         'day_list': reviewable_days
+    })
+
+@login_required
+def review_archive(request):
+    """レビューアーカイブページ - レビュー済みの日記一覧"""
+    reviewed_days = get_reviewed_days(request.user)
+    return render(request, 'diary/review_archive.html', {
+        'day_list': reviewed_days
     })

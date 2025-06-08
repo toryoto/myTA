@@ -2,24 +2,24 @@
 
 {% block content %}
 <div class="space-y-6">
-   <!-- ページヘッダー -->
-   <div class="flex justify-between items-center">
+  <!-- ページヘッダー -->
+  <div class="flex justify-between items-center">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900">レビュー可能な日記</h1>
-      <p class="mt-2 text-gray-600">まだコメントしていない日記一覧（未レビュー）</p>
+      <h1 class="text-3xl font-bold text-gray-900">レビュー済みアーカイブ</h1>
+      <p class="mt-2 text-gray-600">あなたがレビュー（コメント）した日記一覧</p>
     </div>
     <div class="flex items-center space-x-4">
-      <a href="{% url 'diary:review_archive' %}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+      <a href="{% url 'diary:review' %}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h8a2 2 0 002-2V8m-4 4h4"/>
-        </svg>
-        レビュー済みアーカイブ
-      </a>
-      <div class="flex items-center space-x-2">
-        <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
         </svg>
-        <span class="text-sm text-gray-600">未レビュー閲覧中</span>
+        未レビュー一覧
+      </a>
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h8a2 2 0 002-2V8m-4 4h4"/>
+        </svg>
+        <span class="text-sm text-gray-600">アーカイブ閲覧中</span>
       </div>
     </div>
   </div>
@@ -36,13 +36,20 @@
                 <div class="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center mr-3">
                   <span class="text-sm font-medium text-primary-600">{{ day.author.username.0|upper }}</span>
                 </div>
-                <div>
+                <div class="flex-1">
                   <h3 class="text-lg font-semibold text-gray-900">
                     <a href="{% url 'diary:detail' day.pk %}" class="hover:text-primary-600 transition-colors">
                       {{ day.title }}
                     </a>
                   </h3>
                   <p class="text-sm text-gray-600">{{ day.author.username }}</p>
+                </div>
+                <!-- レビュー済みバッジ -->
+                <div class="flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  レビュー済み
                 </div>
               </div>
               
@@ -67,12 +74,12 @@
             
             <!-- アクションボタン -->
             <div class="flex items-center space-x-2 ml-4">
-              <a href="{% url 'diary:detail' day.pk %}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors">
+              <a href="{% url 'diary:detail' day.pk %}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                 </svg>
-                詳細・コメント
+                詳細を見る
               </a>
             </div>
           </div>
@@ -85,27 +92,18 @@
     <div class="text-center py-12">
       <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
         <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h8a2 2 0 002-2V8m-4 4h4"/>
         </svg>
       </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">レビュー可能な日記がありません</h3>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">レビュー済みの日記がありません</h3>
       <div class="max-w-md mx-auto">
-        <p class="text-gray-500 mb-6">まだレビュアーとして指定されていません。日記作成者にレビュアー登録を依頼してください。</p>
-        <div class="bg-blue-50 rounded-lg p-4">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div class="ml-3">
-              <h4 class="text-sm font-medium text-blue-800">レビュアー機能について</h4>
-              <p class="mt-1 text-sm text-blue-700">
-                他のユーザーがあなたをレビュアーに追加すると、そのユーザーの日記にコメントができるようになります。
-              </p>
-            </div>
-          </div>
-        </div>
+        <p class="text-gray-500 mb-6">まだどの日記にもコメントしていません。</p>
+        <a href="{% url 'diary:review' %}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+          レビュー可能な日記を見る
+        </a>
       </div>
     </div>
   {% endif %}
