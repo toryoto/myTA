@@ -19,6 +19,7 @@
           {% if user.is_authenticated %}
             <a class="nav-link" href="{% url 'diary:index' %}">一覧</a>
             <a class="nav-link" href="{% url 'diary:add' %}">追加</a>
+            <a class="nav-link" href="{% url 'diary:manage_reviewers' %}">レビュアー管理</a>
             <span class="nav-link">こんにちは、{{ user.username }}さん</span>
             <a class="nav-link" href="{% url 'accounts:logout' %}">ログアウト</a>
           {% else %}

@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import DayCreateForm
-from .models import Day
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from .forms import DayCreateForm, ReviewerAddForm
+from .models import Day, Reviewer
+from .utils import get_my_reviewers
 from django.views import generic
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class IndexView(LoginRequiredMixin, generic.ListView):
@@ -54,6 +57,37 @@ class DeleteView(LoginRequiredMixin, generic.DeleteView):
 
     def get_queryset(self):
         return Day.objects.filter(author=self.request.user)
+    
+@login_required
+def manage_reviewers(request):
+    """レビュアー管理ページ"""
+    my_reviewers = get_my_reviewers(request.user)
+    
+    if request.method == 'POST':
+        form = ReviewerAddForm(request.POST, diary_owner=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'レビュアーを追加しました。')
+            return redirect('diary:manage_reviewers')
+    else:
+        form = ReviewerAddForm(diary_owner=request.user)
+    
+    return render(request, 'diary/manage_reviewers.html', {
+        'form': form,
+        'reviewers': my_reviewers
+    })
+
+
+@login_required
+def delete_reviewer(request, reviewer_id):
+    """レビュアー削除"""
+    reviewer = get_object_or_404(Reviewer, id=reviewer_id, diary_owner=request.user)
+    reviewer.delete()
+    messages.success(request, f'{reviewer.reviewer.username}をレビュアーから削除しました。')
+    return redirect('diary:manage_reviewers')
+
+
+
 
 # def index(request):
 #     context = {
