@@ -1,9 +1,144 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<form action="" method="POST">
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">送信</button>
-    {% csrf_token %}
-</form>
+<div class="max-w-3xl mx-auto space-y-6">
+  <!-- ページヘッダー -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">
+        {% if object %}日記を編集{% else %}新しい日記を作成{% endif %}
+      </h1>
+      <p class="mt-2 text-gray-600">
+        {% if object %}既存の日記を編集してください{% else %}今日の出来事を記録しましょう{% endif %}
+      </p>
+    </div>
+    <a href="{% url 'diary:index' %}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      一覧に戻る
+    </a>
+  </div>
+
+  <!-- フォーム -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-medium text-gray-900">日記の詳細</h2>
+    </div>
+    <div class="px-6 py-6">
+      <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- タイトルフィールド -->
+        <div>
+          <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+            タイトル <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 2h10m-5 8v6m0 0l-3-3m3 3l3-3"/>
+              </svg>
+            </div>
+            {{ form.title }}
+          </div>
+          {% if form.title.errors %}
+            <div class="mt-1 text-sm text-red-600">
+              {% for error in form.title.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- 日付フィールド -->
+        <div>
+          <label for="{{ form.date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+            日付 <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            {{ form.date }}
+          </div>
+          {% if form.date.errors %}
+            <div class="mt-1 text-sm text-red-600">
+              {% for error in form.date.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- 本文フィールド -->
+        <div>
+          <label for="{{ form.text.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+            本文 <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            {{ form.text }}
+            <div class="absolute top-3 left-3 pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+          </div>
+          {% if form.text.errors %}
+            <div class="mt-1 text-sm text-red-600">
+              {% for error in form.text.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+          <p class="mt-2 text-sm text-gray-500">
+            今日の出来事、感じたこと、考えたことを自由に書いてください。
+          </p>
+        </div>
+
+        <!-- 送信ボタン -->
+        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+          <a href="{% url 'diary:index' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+            キャンセル
+          </a>
+          <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            {% if object %}更新する{% else %}作成する{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// フォームフィールドのスタイリング
+document.addEventListener('DOMContentLoaded', function() {
+  // タイトルフィールド
+  const titleField = document.querySelector('input[name="title"]');
+  if (titleField) {
+    titleField.className = "block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm";
+    titleField.placeholder = "日記のタイトルを入力してください";
+  }
+
+  // 日付フィールド
+  const dateField = document.querySelector('input[name="date"]');
+  if (dateField) {
+    dateField.className = "block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm";
+    dateField.type = "datetime-local";
+  }
+
+  // 本文フィールド
+  const textField = document.querySelector('textarea[name="text"]');
+  if (textField) {
+    textField.className = "block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm";
+    textField.placeholder = "今日の出来事を書いてください...";
+    textField.rows = 8;
+  }
+});
+</script>
 {% endblock %}

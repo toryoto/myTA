@@ -1,44 +1,104 @@
 <!doctype html>
 <html lang="ja">
   <head>
-    <title>日記アプリケーション</title>
-    <!-- Required meta tags -->
+    <title>My TA</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                200: '#bae6fd',
+                300: '#7dd3fc',
+                400: '#38bdf8',
+                500: '#0ea5e9',
+                600: '#0284c7',
+                700: '#0369a1',
+                800: '#075985',
+                900: '#0c4a6e',
+              },
+              gray: {
+                50: '#f9fafb',
+                100: '#f3f4f6',
+                200: '#e5e7eb',
+                300: '#d1d5db',
+                400: '#9ca3af',
+                500: '#6b7280',
+                600: '#4b5563',
+                700: '#374151',
+                800: '#1f2937',
+                900: '#111827',
+              }
+            }
+          }
+        }
+      }
+    </script>
   </head>
-  <body>
-    <div class="container">
-      <!-- ナビゲーション -->
-      <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <a class="navbar-brand" href="{% url 'index' %}">日記アプリ</a>
-        
-        <div class="navbar-nav ml-auto">
-          {% if user.is_authenticated %}
-            <a class="nav-link" href="{% url 'diary:index' %}">一覧</a>
-            <a class="nav-link" href="{% url 'diary:add' %}">追加</a>
-            <a class="nav-link" href="{% url 'diary:manage_reviewers' %}">レビュアー管理</a>
-            <a class="nav-link" href="{% url 'diary:review' %}">レビュー</a>
-            <span class="nav-link">こんにちは、{{ user.username }}さん</span>
-            <a class="nav-link" href="{% url 'accounts:logout' %}">ログアウト</a>
-          {% else %}
-            <a class="nav-link" href="{% url 'accounts:login' %}">ログイン</a>
-            <a class="nav-link" href="{% url 'accounts:signup' %}">新規登録</a>
-          {% endif %}
+  <body class="bg-gray-50 min-h-screen flex flex-col">
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center">
+            <a href="{% url 'index' %}" class="text-xl font-semibold text-gray-900 hover:text-primary-600 transition-colors">
+              📔 My TA
+            </a>
+          </div>
+          
+          <div class="flex items-center space-x-1">
+            {% if user.is_authenticated %}
+              <a href="{% url 'diary:index' %}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors">
+                一覧
+              </a>
+              <a href="{% url 'diary:add' %}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors">
+                追加
+              </a>
+              <a href="{% url 'diary:manage_reviewers' %}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors">
+                レビュアー管理
+              </a>
+              <a href="{% url 'diary:review' %}" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors">
+                レビュー
+              </a>
+              
+              <div class="flex items-center ml-4 pl-4 border-l border-gray-200">
+                <span class="text-sm text-gray-600 mr-3">
+                  こんにちは、<span class="font-medium text-gray-900">{{ user.username }}</span>さん
+                </span>
+                <a href="{% url 'accounts:logout' %}" class="px-3 py-1.5 rounded-md text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 transition-colors">
+                  ログアウト
+                </a>
+              </div>
+            {% else %}
+              <a href="{% url 'accounts:login' %}" class="px-4 py-2 rounded-md text-sm font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 transition-colors">
+                ログイン
+              </a>
+              <a href="{% url 'accounts:signup' %}" class="ml-2 px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors">
+                新規登録
+              </a>
+            {% endif %}
+          </div>
         </div>
-      </nav>
+      </div>
+    </nav>
 
-      <!-- メインコンテンツ -->
+    <main class="flex-1 max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 w-full">
       {% block content %}
       {% endblock %}
-    </div>
+    </main>
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <footer class="bg-white border-t border-gray-200">
+      <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        <p class="text-center text-sm text-gray-500">
+          &copy; 2025 MY TA. All rights reserved.
+        </p>
+      </div>
+    </footer>
   </body>
 </html>
