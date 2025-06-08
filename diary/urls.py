@@ -12,4 +12,5 @@ urlpatterns = [
     path('reviewers/', views.manage_reviewers, name='manage_reviewers'),  # /diary/reviewers/
     path('reviewers/delete/<int:reviewer_id>/', views.delete_reviewer, name='delete_reviewer'),  # /diary/reviewers/delete/1/
     path('review/', views.review_list, name='review'),  # /diary/review/
+    path('htmx/comment/<int:day_id>/', views.add_comment_htmx, name='add_comment_htmx'),  # /diary/htmx/comment/1/
 ]

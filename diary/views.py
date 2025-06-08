@@ -9,6 +9,7 @@ from .utils import get_my_reviewers, get_reviewable_days, can_comment_on_day
 from django.views import generic
 from django.urls import reverse_lazy
 from django.db.models import Q
+from django.http import HttpResponse
 
 
 class IndexView(LoginRequiredMixin, generic.ListView):
@@ -59,26 +60,6 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
             'is_reviewer': is_reviewer,
         })
         return context
-    
-    def post(self, request, *args, **kwargs):
-        """コメント投稿処理"""
-        day = self.get_object()
-        
-        # レビュー権限チェック
-        if not can_comment_on_day(request.user, day):
-            messages.error(request, 'この日記にコメントする権限がありません。')
-            return redirect('diary:detail', pk=day.pk)
-        
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.day = day
-            comment.author = request.user
-            comment.save()
-            messages.success(request, 'コメントを投稿しました。')
-        
-        return redirect('diary:detail', pk=day.pk)
-
 
 class CreateView(LoginRequiredMixin, generic.CreateView):
     model = Day
@@ -110,6 +91,44 @@ class DeleteView(LoginRequiredMixin, generic.DeleteView):
 
     def get_queryset(self):
         return Day.objects.filter(author=self.request.user)
+
+def add_comment_htmx(request, day_id):
+    """HTMXを使用したコメント投稿機能"""
+    day = get_object_or_404(Day, id=day_id)
+    
+    # レビュー権限チェック
+    if not can_comment_on_day(request.user, day):
+        return HttpResponse("<div class='text-red-500'>コメントする権限がありません</div>", status=403)
+    
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.day = day
+            comment.author = request.user
+            comment.save()
+            
+            # 新しいコメント一覧を返す（返信でないもののみ）
+            comments = Comment.objects.filter(day=day, reply_to__isnull=True)
+            comment_form = CommentForm()
+            
+            return render(request, 'diary/partials/comment_section.html', {
+                'comments': comments,
+                'comment_form': comment_form,
+                'day': day,
+                'is_reviewer': True
+            })
+        else:
+            # エラーがある場合、フォームとエラーを含むセクションを返す
+            comments = Comment.objects.filter(day=day, reply_to__isnull=True)
+            return render(request, 'diary/partials/comment_section.html', {
+                'comments': comments,
+                'comment_form': form,
+                'day': day,
+                'is_reviewer': True
+            })
+    
+    return HttpResponse(status=405)
     
 @login_required
 def manage_reviewers(request):
