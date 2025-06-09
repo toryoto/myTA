@@ -16,10 +16,50 @@ class IndexView(LoginRequiredMixin, generic.ListView):
     model = Day
     template_name = 'diary/day_list.html'
     context_object_name = 'day_list'
-
+    
     def get_queryset(self):
-        return Day.objects.filter(author=self.request.user)
-
+        queryset = Day.objects.filter(author=self.request.user)
+        
+        # 検索クエリを取得
+        search_query = self.request.GET.get('search')
+        if search_query:
+            print(f"検索クエリ：{search_query}")
+            
+            try:
+                from .vision_rag import search_days_by_image_content
+                
+                # 画像内容に基づく検索を実行
+                matched_days = search_days_by_image_content(
+                    query_text=search_query,
+                    user_id=self.request.user.id,
+                    top_k=20  # 最大20件まで返す
+                )
+                
+                if matched_days:
+                    # マッチした日記のIDリストを取得
+                    matched_day_ids = [day.id for day in matched_days]
+                    
+                    # 元のクエリセットをマッチした日記に絞り込み
+                    queryset = queryset.filter(id__in=matched_day_ids)
+                    
+                    # Vision-RAGの結果順序を保持するためのカスタム並び替え
+                    preserved_order = {day_id: index for index, day_id in enumerate(matched_day_ids)}
+                    queryset = sorted(queryset, key=lambda x: preserved_order.get(x.id, float('inf')))
+                    
+                    print(f"Vision-RAG検索結果: {len(matched_days)}件マッチ")
+                else:
+                    # マッチしなかった場合は空のクエリセットを返す
+                    queryset = queryset.none()
+                    print("Vision-RAG検索結果: マッチなし")
+            except Exception as e:
+                print(f"Vision-RAG検索中にエラーが発生しました: {e}")
+                # エラー時は空の結果を返す
+                queryset = queryset.none()
+        # 検索クエリがない場合
+        else:
+            queryset = queryset
+        
+        return queryset
     
 class DetailView(LoginRequiredMixin, generic.DetailView):
     model = Day
@@ -38,7 +78,7 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
         context = super().get_context_data(**kwargs)
         day = self.get_object()
         user = self.request.user
-        
+
         # ユーザーの権限を判定
         is_owner = day.author == user
         is_reviewer = can_comment_on_day(user, day)
@@ -122,7 +162,7 @@ def add_comment_htmx(request, day_id):
             
             return render(request, 'diary/partials/comment_section.html', {
                 'comments': comments,
-                'comment_form': form,
+                # 'comment_form': form,
                 'day': day,
                 'is_reviewer': True
             })

@@ -10,3 +10,5 @@ wheels/
 .venv
 
 db.sqlite3
+gcp_key.json
+.env

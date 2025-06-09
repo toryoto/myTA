@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="space-y-6">
-  <!-- ページヘッダー -->
   <div class="flex items-center justify-between">
     <nav class="flex" aria-label="Breadcrumb">
       <ol class="flex items-center space-x-2">
@@ -24,7 +23,6 @@
     </nav>
   </div>
 
-  <!-- 日記内容 -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200">
     <div class="px-6 py-4 border-b border-gray-200">
       <div class="flex justify-between items-start">
@@ -65,12 +63,14 @@
     </div>
     <div class="px-6 py-6">
       <div class="prose max-w-none">
+        {% if day.image %}
+          <img src="{{ day.image.url }}" alt="{{ day.title }}" class="mb-4 rounded-lg shadow-md max-w-sm mx-auto">
+        {% endif %}
         <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ day.text }}</p>
       </div>
     </div>
   </div>
 
-  <!-- メッセージ表示 -->
   {% if messages %}
     {% for message in messages %}
       <div class="rounded-md bg-green-50 p-4">
@@ -100,14 +100,12 @@
     {% endfor %}
   {% endif %}
 
-  <!-- コメントセクション（HTMX対応） -->
   {% if comments or is_owner or is_reviewer %}
   <div id="comment-section">
     {% include 'diary/partials/comment_section.html' %}
   </div>
   {% endif %}
 
-  <!-- 戻るボタン -->
   <div class="flex justify-start space-x-3">
     {% if is_owner %}
       <a href="{% url 'diary:index' %}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors">
