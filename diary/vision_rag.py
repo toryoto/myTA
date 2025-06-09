@@ -8,6 +8,7 @@ import requests
 from .models import Day
 from dotenv import load_dotenv
 
+load_dotenv()
 
 class VisionRAGSearcher:
     def __init__(self, cohere_api_key=None):
