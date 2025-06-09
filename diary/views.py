@@ -23,8 +23,41 @@ class IndexView(LoginRequiredMixin, generic.ListView):
         # 検索クエリを取得
         search_query = self.request.GET.get('search')
         if search_query:
-            print("検索クエリ：", search_query)
-            pass
+            print(f"検索クエリ：{search_query}")
+            
+            try:
+                from .vision_rag import search_days_by_image_content
+                
+                # 画像内容に基づく検索を実行
+                matched_days = search_days_by_image_content(
+                    query_text=search_query,
+                    user_id=self.request.user.id,
+                    top_k=20  # 最大20件まで返す
+                )
+                
+                if matched_days:
+                    # マッチした日記のIDリストを取得
+                    matched_day_ids = [day.id for day in matched_days]
+                    
+                    # 元のクエリセットをマッチした日記に絞り込み
+                    queryset = queryset.filter(id__in=matched_day_ids)
+                    
+                    # Vision-RAGの結果順序を保持するためのカスタム並び替え
+                    preserved_order = {day_id: index for index, day_id in enumerate(matched_day_ids)}
+                    queryset = sorted(queryset, key=lambda x: preserved_order.get(x.id, float('inf')))
+                    
+                    print(f"Vision-RAG検索結果: {len(matched_days)}件マッチ")
+                else:
+                    # マッチしなかった場合は空のクエリセットを返す
+                    queryset = queryset.none()
+                    print("Vision-RAG検索結果: マッチなし")
+            except Exception as e:
+                print(f"Vision-RAG検索中にエラーが発生しました: {e}")
+                # エラー時は空の結果を返す
+                queryset = queryset.none()
+        # 検索クエリがない場合
+        else:
+            queryset = queryset
         
         return queryset
     
