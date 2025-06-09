@@ -38,7 +38,7 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
         context = super().get_context_data(**kwargs)
         day = self.get_object()
         user = self.request.user
-        
+
         # ユーザーの権限を判定
         is_owner = day.author == user
         is_reviewer = can_comment_on_day(user, day)

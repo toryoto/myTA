@@ -64,7 +64,7 @@
     <div class="px-6 py-6">
       <div class="prose max-w-none">
         {% if day.image %}
-          <img src="{{ day.image.url }}" alt="{{ day.title }}" class="mb-4 rounded-lg shadow-md">
+          <img src="{{ day.image.url }}" alt="{{ day.title }}" class="mb-4 rounded-lg shadow-md max-w-sm mx-auto">
         {% endif %}
         <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ day.text }}</p>
       </div>
