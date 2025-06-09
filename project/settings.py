@@ -127,7 +127,10 @@ STATIC_URL = '/static/'
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'django_diary_bucket'
 GS_PROJECT_ID = 'django-pra'
-GS_CREDENTIALS = os.path.join(BASE_DIR, 'gcs_key.json') # サービスアカウントキーのパス
+
+gcp_key_path = os.path.join(BASE_DIR, 'gcp_key.json')
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = gcp_key_path
+GS_CREDENTIALS = None
 
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/diary'
