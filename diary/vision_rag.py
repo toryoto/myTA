@@ -173,15 +173,9 @@ def build_image_embeddings_cache(user_id):
             image_source = None
             
             if day.image:
-                # まずURLを試行（GCSなどのリモートストレージ対応）
-                if hasattr(day.image, 'url'):
-                    image_source = day.image.url
-                    print(f"画像URL使用: {image_source}")
-                # ローカルファイルの場合
-                elif hasattr(day.image, 'path'):
-                    image_source = day.image.path
-                    print(f"画像パス使用: {image_source}")
-            
+                image_source = day.image.url
+                print(f"画像URL使用: {image_source}")
+
             if not image_source:
                 print(f"日記ID {day.id}: 画像ソースが取得できませんでした")
                 continue
