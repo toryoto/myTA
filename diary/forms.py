@@ -7,7 +7,7 @@ class DayCreateForm(forms.ModelForm):
 
     class Meta:
         model = Day
-        fields = ('title', 'text', 'date')
+        fields = ('title', 'text', 'date', 'image')
 
 
 class ReviewerAddForm(forms.Form):

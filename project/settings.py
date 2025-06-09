@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
-    'widget_tweaks', 
+    'widget_tweaks',
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -121,6 +122,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Google Cloud Storage Settings
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'django_diary_bucket'
+GS_PROJECT_ID = 'django-pra'
+GS_CREDENTIALS = os.path.join(BASE_DIR, 'gcs_key.json') # サービスアカウントキーのパス
 
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/diary'

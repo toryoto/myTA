@@ -6,5 +6,8 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "django>=3.2,<3.3",
+    "django-storages>=1.14.6",
     "django-widget-tweaks>=1.5.0",
+    "google-cloud-storage>=3.1.0",
+    "pillow>=11.2.1",
 ]

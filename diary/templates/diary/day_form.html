@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="max-w-3xl mx-auto space-y-6">
-  <!-- ページヘッダー -->
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-3xl font-bold text-gray-900">
@@ -20,16 +19,14 @@
     </a>
   </div>
 
-  <!-- フォーム -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200">
     <div class="px-6 py-4 border-b border-gray-200">
       <h2 class="text-lg font-medium text-gray-900">日記の詳細</h2>
     </div>
     <div class="px-6 py-6">
-      <form method="POST" class="space-y-6">
+      <form method="POST" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
         
-        <!-- タイトルフィールド -->
         <div>
           <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
             タイトル <span class="text-red-500">*</span>
@@ -51,7 +48,6 @@
           {% endif %}
         </div>
 
-        <!-- 日付フィールド -->
         <div>
           <label for="{{ form.date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
             日付 <span class="text-red-500">*</span>
@@ -73,7 +69,6 @@
           {% endif %}
         </div>
 
-        <!-- 本文フィールド -->
         <div>
           <label for="{{ form.text.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
             本文 <span class="text-red-500">*</span>
@@ -98,7 +93,65 @@
           </p>
         </div>
 
-        <!-- 送信ボタン -->
+        <div>
+          <label for="{{ form.image.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+            画像
+          </label>
+          <div class="mt-1 border-2 border-gray-300 border-dashed rounded-md overflow-hidden">
+            <!-- 画像プレビュー表示エリア -->
+            <div id="imagePreviewContainer" class="hidden p-4 bg-gray-50 border-b border-gray-200">
+              <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                  <img id="imagePreview" class="w-24 h-24 object-cover rounded-md shadow-sm" alt="プレビュー">
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-900" id="imageFileName"></p>
+                  <p class="text-sm text-gray-500">選択された画像</p>
+                </div>
+              </div>
+            </div>
+            
+            <div id="fileUploadArea" class="px-6 pt-5 pb-6">
+              <div class="space-y-1 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M28 8H10c-1.1 0-2 .9-2 2v28c0 1.1.9 2 2 2h28c1.1 0 2-.9 2-2V20M28 8a4 4 0 00-4-4c-2.21 0-4 1.79-4 4m0 0h8m-8 0v4m0 4l-4 4-6-6-4 4V42" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <div class="flex text-sm text-gray-600">
+                  <label for="{{ form.image.id_for_label }}" class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
+                    <span>ファイルをアップロード</span>
+                    {{ form.image }}
+                  </label>
+                </div>
+                <p class="text-xs text-gray-500">
+                  PNG, JPG, GIF (最大 10MB)
+                </p>
+              </div>
+            </div>
+            
+            {% if form.image.value %}
+              <div class="p-4 bg-gray-50 border-b border-gray-200">
+                <div class="flex items-start space-x-4">
+                  <div class="flex-shrink-0">
+                    <img src="{{ form.image.value.url }}" class="w-24 h-24 object-cover rounded-md shadow-sm" alt="Current Image">
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900">{{ form.image.value.name|cut:"diary_images/" }}</p>
+                    <p class="text-sm text-gray-500">現在の画像</p>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+          
+          {% if form.image.errors %}
+            <div class="mt-1 text-sm text-red-600">
+              {% for error in form.image.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
         <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
           <a href="{% url 'diary:index' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
             キャンセル
@@ -138,6 +191,31 @@ document.addEventListener('DOMContentLoaded', function() {
     textField.className = "block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm";
     textField.placeholder = "今日の出来事を書いてください...";
     textField.rows = 8;
+  }
+
+  const imageField = document.querySelector('input[name="image"]');
+  const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+  const imagePreview = document.getElementById('imagePreview');
+  const imageFileName = document.getElementById('imageFileName');
+  const fileUploadArea = document.getElementById('fileUploadArea');
+
+  if (imageField) {
+    imageField.className = "absolute inset-0 w-full h-full opacity-0 cursor-pointer";
+    
+    imageField.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imagePreview.src = e.target.result;
+          imageFileName.textContent = file.name;
+          
+          imagePreviewContainer.classList.remove('hidden');
+          fileUploadArea.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
   }
 });
 </script>

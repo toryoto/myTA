@@ -122,7 +122,7 @@ def add_comment_htmx(request, day_id):
             
             return render(request, 'diary/partials/comment_section.html', {
                 'comments': comments,
-                'comment_form': form,
+                # 'comment_form': form,
                 'day': day,
                 'is_reviewer': True
             })

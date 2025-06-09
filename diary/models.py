@@ -8,6 +8,7 @@ class Day(models.Model):
     text = models.TextField('本文')
     date = models.DateTimeField('日付', default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='diary_images/', null=True, blank=True, verbose_name='画像')
     
     @property
     def has_reviewer_comments(self):
