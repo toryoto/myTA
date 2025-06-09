@@ -16,10 +16,17 @@ class IndexView(LoginRequiredMixin, generic.ListView):
     model = Day
     template_name = 'diary/day_list.html'
     context_object_name = 'day_list'
-
+    
     def get_queryset(self):
-        return Day.objects.filter(author=self.request.user)
-
+        queryset = Day.objects.filter(author=self.request.user)
+        
+        # 検索クエリを取得
+        search_query = self.request.GET.get('search')
+        if search_query:
+            print("検索クエリ：", search_query)
+            pass
+        
+        return queryset
     
 class DetailView(LoginRequiredMixin, generic.DetailView):
     model = Day
