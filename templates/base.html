@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="ja">
   <head>
-    <title>My TA</title>
+    <title>My DE</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    {% load tailwind_tags %}
+    {% tailwind_css %}
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script>
@@ -50,7 +50,7 @@
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center">
             <a href="{% url 'diary:index' %}" class="text-xl font-semibold text-gray-900 hover:text-primary-600 transition-colors">
-              📔 My TA
+              📔 My DE
             </a>
           </div>
           
@@ -101,7 +101,7 @@
     <footer class="bg-white border-t border-gray-200">
       <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
         <p class="text-center text-sm text-gray-500">
-          &copy; 2025 MY TA. All rights reserved.
+          &copy; 2025 MY DE. All rights reserved.
         </p>
       </div>
     </footer>

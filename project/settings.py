@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
     'widget_tweaks',
-    'storages'
+    'storages',
+    'tailwind',
+    'theme'
 ]
 
 MIDDLEWARE = [
@@ -137,3 +139,5 @@ GS_CREDENTIALS = None
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/diary'
 LOGOUT_REDIRECT_URL = '/'
+
+TAILWIND_APP_NAME = 'theme'
