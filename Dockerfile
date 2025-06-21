@@ -15,6 +15,7 @@ COPY . .
 
 # Tailwind CSSをインストール
 RUN uv run python manage.py tailwind install
+RUN sync
 
 # 本番用CSSをビルド
 RUN uv run python manage.py tailwind build
