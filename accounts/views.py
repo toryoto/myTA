@@ -7,8 +7,8 @@ from django.views import generic
 
 class SignUpView(generic.CreateView):
     form_class = UserCreationForm
-    template_name = 'accounts/signup.html'
-    success_url = reverse_lazy('diary:index')
+    template_name = "accounts/signup.html"
+    success_url = reverse_lazy("diary:index")
 
     # クライアントのformがPOSTメソッドで送信され、かつフォームのバリデーションが成功すると自動で実行される
     def form_valid(self, form):

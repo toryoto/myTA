@@ -1,79 +1,80 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
-
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6">
-  <!-- ページヘッダー -->
-  <div class="flex justify-between items-center">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900">レビュアー管理</h1>
-      <p class="mt-2 text-gray-600">あなたの日記にコメントできるユーザーを管理します</p>
-    </div>
-    <a href="{% url 'diary:index' %}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors">
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-      </svg>
-      日記一覧に戻る
-    </a>
-  </div>
-
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- レビュアー追加フォーム -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-lg font-medium text-gray-900 flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-          </svg>
-          新しいレビュアーを追加
-        </h2>
-      </div>
-      <div class="px-6 py-6">
-        <form hx-post="{% url 'diary:add_reviewer_htmx' %}"
-          hx-target="#reviewer-form-section"
-          hx-swap="innerHTML"
-          class="space-y-4">
-          {% csrf_token %}
-          <div id="reviewer-form-section">
-            {% include 'diary/partials/reviewer_form.html' %}
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- 説明カード -->
-    <div class="bg-blue-50 rounded-lg border border-blue-200">
-      <div class="px-6 py-6">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-blue-800">レビュアー機能について</h3>
-            <div class="mt-2 text-sm text-blue-700">
-              <ul class="list-disc list-inside space-y-1">
-                <li>レビュアーは、あなたの全ての日記を閲覧できます</li>
-                <li>レビュアーは、あなたの日記にコメントを投稿できます</li>
-                <li>レビュアーは、他のレビュアーのコメントも閲覧できます</li>
-                <li>レビュアーの追加・削除はいつでも可能です</li>
-              </ul>
+    <div class="max-w-4xl mx-auto space-y-6">
+        <!-- ページヘッダー -->
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">レビュアー管理</h1>
+                <p class="mt-2 text-gray-600">あなたの日記にコメントできるユーザーを管理します</p>
             </div>
-          </div>
+            <a href="{% url 'diary:index' %}"
+               class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors">
+                <svg class="w-4 h-4 mr-2"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                日記一覧に戻る
+            </a>
         </div>
-      </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- レビュアー追加フォーム -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-900 flex items-center">
+                        <svg class="w-5 h-5 mr-2"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        新しいレビュアーを追加
+                    </h2>
+                </div>
+                <div class="px-6 py-6">
+                    <form hx-post="{% url 'diary:add_reviewer_htmx' %}"
+                          hx-target="#reviewer-form-section"
+                          hx-swap="innerHTML"
+                          class="space-y-4">
+                        {% csrf_token %}
+                        <div id="reviewer-form-section">{% include 'diary/partials/reviewer_form.html' %}</div>
+                    </form>
+                </div>
+            </div>
+            <!-- 説明カード -->
+            <div class="bg-blue-50 rounded-lg border border-blue-200">
+                <div class="px-6 py-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-blue-400"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">レビュアー機能について</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>レビュアーは、あなたの全ての日記を閲覧できます</li>
+                                    <li>レビュアーは、あなたの日記にコメントを投稿できます</li>
+                                    <li>レビュアーは、他のレビュアーのコメントも閲覧できます</li>
+                                    <li>レビュアーの追加・削除はいつでも可能です</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 現在のレビュアー一覧 -->
+        <div id="reviewer-list-section">{% include 'diary/partials/reviewer_list.html' %}</div>
     </div>
-  </div>
-
-  <!-- 現在のレビュアー一覧 -->
-  <div id="reviewer-list-section">
-    {% include 'diary/partials/reviewer_list.html' %}
-  </div>
-</div>
-
-<!-- CSRFトークンを取得するためのJavaScript -->
-<script>
+    <!-- CSRFトークンを取得するためのJavaScript -->
+    <script>
 document.addEventListener('DOMContentLoaded', function() {
     // CSRFトークンを取得してHTMXリクエストに設定
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -83,5 +84,5 @@ document.addEventListener('DOMContentLoaded', function() {
         event.detail.headers['X-CSRFToken'] = csrfToken;
     });
 });
-</script>
+    </script>
 {% endblock %}

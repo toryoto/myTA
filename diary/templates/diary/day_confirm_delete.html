@@ -1,87 +1,97 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="max-w-2xl mx-auto space-y-6">
-  <!-- ページヘッダー -->
-  <div class="text-center">
-    <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-red-100 mb-4">
-      <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-      </svg>
-    </div>
-    <h1 class="text-2xl font-bold text-gray-900 mb-2">日記を削除</h1>
-    <p class="text-gray-600">この操作は取り消すことができません。本当に削除しますか？</p>
-  </div>
-
-  <!-- 削除対象の日記情報 -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-medium text-gray-900">削除対象の日記</h2>
-    </div>
-    <div class="px-6 py-4">
-      <dl class="space-y-4">
-        <div>
-          <dt class="text-sm font-medium text-gray-500">タイトル</dt>
-          <dd class="mt-1 text-sm text-gray-900 font-medium">{{ day.title }}</dd>
+    <div class="max-w-2xl mx-auto space-y-6">
+        <!-- ページヘッダー -->
+        <div class="text-center">
+            <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-red-100 mb-4">
+                <svg class="h-6 w-6 text-red-600"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">日記を削除</h1>
+            <p class="text-gray-600">この操作は取り消すことができません。本当に削除しますか？</p>
         </div>
-        <div>
-          <dt class="text-sm font-medium text-gray-500">日付</dt>
-          <dd class="mt-1 text-sm text-gray-900">{{ day.date|date:"Y年m月d日 H:i" }}</dd>
+        <!-- 削除対象の日記情報 -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-medium text-gray-900">削除対象の日記</h2>
+            </div>
+            <div class="px-6 py-4">
+                <dl class="space-y-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">タイトル</dt>
+                        <dd class="mt-1 text-sm text-gray-900 font-medium">
+                            {{ day.title }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">日付</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {{ day.date|date:"Y年m月d日 H:i" }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">本文</dt>
+                        <dd class="mt-1 text-sm text-gray-900 bg-gray-50 p-4 rounded-md">
+                            {{ day.text|truncatewords:50|linebreaksbr }}
+                            {% if day.text|length > 200 %}<span class="text-gray-500">...</span>{% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
         </div>
-        <div>
-          <dt class="text-sm font-medium text-gray-500">本文</dt>
-          <dd class="mt-1 text-sm text-gray-900 bg-gray-50 p-4 rounded-md">
-            {{ day.text|truncatewords:50|linebreaksbr }}
-            {% if day.text|length > 200 %}
-              <span class="text-gray-500">...</span>
-            {% endif %}
-          </dd>
+        <!-- 警告メッセージ -->
+        <div class="rounded-md bg-red-50 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">削除についての注意事項</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>この日記を削除すると、完全に失われます</li>
+                            <li>関連するコメントも全て削除されます</li>
+                            <li>この操作は取り消すことができません</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
-      </dl>
+        <!-- アクションボタン -->
+        <div class="flex justify-center space-x-4">
+            <a href="{% url 'diary:index' %}"
+               class="inline-flex items-center px-6 py-2 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+                <svg class="w-4 h-4 mr-2"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                キャンセル
+            </a>
+            <form method="POST" class="inline">
+                {% csrf_token %}
+                <button type="submit"
+                        class="inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                        onclick="return confirm('本当に削除しますか？この操作は取り消せません。')">
+                    <svg class="w-4 h-4 mr-2"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    削除する
+                </button>
+            </form>
+        </div>
     </div>
-  </div>
-
-  <!-- 警告メッセージ -->
-  <div class="rounded-md bg-red-50 p-4">
-    <div class="flex">
-      <div class="flex-shrink-0">
-        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-      </div>
-      <div class="ml-3">
-        <h3 class="text-sm font-medium text-red-800">
-          削除についての注意事項
-        </h3>
-        <div class="mt-2 text-sm text-red-700">
-          <ul class="list-disc pl-5 space-y-1">
-            <li>この日記を削除すると、完全に失われます</li>
-            <li>関連するコメントも全て削除されます</li>
-            <li>この操作は取り消すことができません</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- アクションボタン -->
-  <div class="flex justify-center space-x-4">
-    <a href="{% url 'diary:index' %}" class="inline-flex items-center px-6 py-2 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-      </svg>
-      キャンセル
-    </a>
-    
-    <form method="POST" class="inline">
-      {% csrf_token %}
-      <button type="submit" class="inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" onclick="return confirm('本当に削除しますか？この操作は取り消せません。')">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-        </svg>
-        削除する
-      </button>
-    </form>
-  </div>
-</div>
 {% endblock %}
