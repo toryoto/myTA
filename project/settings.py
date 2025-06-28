@@ -1,6 +1,8 @@
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
+from django.core.management.utils import get_random_secret_key
 
 load_dotenv()
 
@@ -12,9 +14,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+BUILD_COMMANDS = ['collectstatic', 'tailwind']
+is_build_command = any(cmd in sys.argv for cmd in BUILD_COMMANDS)
+if not SECRET_KEY:
+    if is_build_command:
+        # ビルド時は一時的なキーを生成
+        SECRET_KEY = get_random_secret_key()
+        print("INFO: Using temporary SECRET_KEY for build command")
+    elif os.environ.get("ENVIRONMENT") == "production":
+        # 本番環境でSECRET_KEYが設定されていない場合はエラー
+        raise ValueError("DJANGO_SECRET_KEY environment variable is required in production")
+    else:
+        # 開発環境では一時的なキーを生成
+        SECRET_KEY = get_random_secret_key()
+        print("WARNING: Using temporary SECRET_KEY. Set DJANGO_SECRET_KEY environment variable.")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = []
 
@@ -159,7 +174,7 @@ else:
 
     gcp_key_path = BASE_DIR / "gcp_key.json"
     if gcp_key_path.exists():
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = gcp_key_path
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(gcp_key_path)
         GS_CREDENTIALS = None
 
 LOGIN_URL = "/accounts/login/"
