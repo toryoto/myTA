@@ -1,11 +1,14 @@
-FROM python:3.9
+FROM python:3.9-slim
 
 WORKDIR /app
 
-RUN pip install uv
-
 # Node.jsとnpmをインストール（Tailwind CSS用）
-RUN apt-get update && apt-get install -y nodejs npm
+RUN apt-get update && apt-get install -y \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install uv
 
 COPY uv.lock pyproject.toml ./
 
@@ -15,7 +18,9 @@ COPY . .
 
 # Tailwind CSSをインストール
 RUN uv run python manage.py tailwind install
-RUN sync
+
+# データベースマイグレーション
+RUN uv run python manage.py migrate
 
 # 本番用CSSをビルド
 RUN uv run python manage.py tailwind build

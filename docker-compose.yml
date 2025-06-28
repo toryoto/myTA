@@ -19,7 +19,8 @@ services:
     env_file:
       - .env
     command: >
-      sh -c "uv run python manage.py tailwind start &
+      sh -c "uv run python manage.py migrate &&
+             uv run python manage.py tailwind start &
              uv run python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - db

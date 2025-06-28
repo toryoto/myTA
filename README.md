@@ -57,3 +57,10 @@ docker-compose exec web bash -c "cd theme/static_src && npm run build"
 ```bash
 docker-compose exec web uv run python manage.py migrate
 ```
+
+### formatter
+```bash
+uv run djlint . --reformat
+
+uv run black .
+```
