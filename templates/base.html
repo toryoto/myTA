@@ -6,7 +6,11 @@
         <meta name="viewport"
               content="width=device-width, initial-scale=1, shrink-to-fit=no">
         {% load tailwind_tags %}
-        {% tailwind_css %}
+        {% if not debug %}
+            <link rel="stylesheet" type="text/css" href="{% static 'theme/css/dist/styles.css' %}">
+        {% else %}
+            {% tailwind_css %}
+        {% endif %}
         <!-- HTMX -->
         <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     </head>

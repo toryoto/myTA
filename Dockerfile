@@ -23,8 +23,6 @@ CMD ["uv", "run", "python", "manage.py", "runserver", "0.0.0.0:8000"]
 FROM base as production
 
 # ビルド時はsettings.pyで自動的に一時キーが生成される
-RUN uv run python manage.py tailwind install
-RUN uv run python manage.py tailwind build
 RUN uv run python manage.py collectstatic --noinput
 
 RUN adduser --disabled-password appuser
@@ -35,4 +33,6 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8080
 
 # 実行時はSecret Managerから DJANGO_SECRET_KEY が自動注入される
-CMD ["uv", "run", "gunicorn", "project.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:$PORT", "--workers", "2"]
+# CMD ["uv", "run", "gunicorn", "project.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:$PORT", "--workers", "2"]
+# wsgiを標準で使う
+CMD ["sh", "-c", "echo 'Starting Django on port ${PORT:-8080}' && uv run python -c 'import django; print(f\"Django version: {django.get_version()}\")' && uv run gunicorn project.wsgi:application --bind 0.0.0.0:${PORT:-8080} --workers 1 --timeout 0 --preload --log-level debug"]

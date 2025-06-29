@@ -21,6 +21,9 @@ dependencies = [
     "psycopg2-binary>=2.9.10",
     "requests>=2.32.3",
     "tqdm>=4.67.1",
+    "psycopg2-binary>=2.9.0",
+    "google-cloud-secret-manager>=2.16.0",
+    "gunicorn>=20.1.0",
 ]
 [tool.black]
 line-length = 88

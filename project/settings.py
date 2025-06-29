@@ -9,19 +9,42 @@ load_dotenv()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
+# Secret Manager 用の関数
+def get_secret(secret_id):
+    """Secret Manager から機密情報を取得"""
+    try:
+        from google.cloud import secretmanager
+        client = secretmanager.SecretManagerServiceClient()
+        project_id = "django-pra"
+        name = f"projects/{project_id}/secrets/{secret_id}/versions/latest"
+        response = client.access_secret_version(request={"name": name})
+        return response.payload.data.decode("UTF-8")
+    except Exception as e:
+        # 開発環境やテスト時のフォールバック
+        return os.getenv(secret_id, "")
+
+# 環境判定
+IS_CLOUD_RUN = os.getenv('K_SERVICE') is not None
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
+
+# Cloud Run での実行時は production に設定
+if IS_CLOUD_RUN:
+    ENVIRONMENT = "production"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 BUILD_COMMANDS = ['collectstatic', 'tailwind']
 is_build_command = any(cmd in sys.argv for cmd in BUILD_COMMANDS)
+
 if not SECRET_KEY:
-    if is_build_command:
+    if IS_CLOUD_RUN:
+        # Cloud Run では Secret Manager から取得
+        SECRET_KEY = get_secret('django-secret-key')
+    elif is_build_command:
         # ビルド時は一時的なキーを生成
         SECRET_KEY = get_random_secret_key()
         print("INFO: Using temporary SECRET_KEY for build command")
-    elif os.environ.get("ENVIRONMENT") == "production":
+    elif ENVIRONMENT == "production":
         # 本番環境でSECRET_KEYが設定されていない場合はエラー
         raise ValueError("DJANGO_SECRET_KEY environment variable is required in production")
     else:
@@ -31,11 +54,15 @@ if not SECRET_KEY:
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 
-ALLOWED_HOSTS = []
+# Cloud Run では DEBUG を False に強制
+if IS_CLOUD_RUN:
+    DEBUG = False
 
+ALLOWED_HOSTS = []
+if IS_CLOUD_RUN:
+    ALLOWED_HOSTS = ['*']  # 実際のドメインに制限することを推奨
 
 # Application definition
-
 INSTALLED_APPS = [
     "diary.apps.DiaryConfig",
     "django.contrib.admin",
@@ -81,13 +108,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "project.wsgi.application"
 
-
 # Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-
-ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
-
-if ENVIRONMENT == "production":
+if IS_CLOUD_RUN:
+    # Cloud Run での Cloud SQL 接続
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": get_secret('db-name'),
+            "USER": get_secret('db-user'),
+            "PASSWORD": get_secret('db-password'),
+            "HOST": f'/cloudsql/{get_secret("db-connection-name")}',
+            "PORT": "5432",
+        }
+    }
+elif ENVIRONMENT == "production":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -117,10 +151,6 @@ else:
         }
     }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -136,24 +166,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/2.0/topics/i18n/
-
 LANGUAGE_CODE = "ja"
-
 TIME_ZONE = "Asia/Tokyo"
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.0/howto/static-files/
-
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
@@ -161,13 +181,14 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-# 開発環境ではローカルに画像を保存
-if DEBUG:
+# File storage settings
+if DEBUG and not IS_CLOUD_RUN:
+    # 開発環境ではローカルに画像を保存
     DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
 else:
-    # 本番環境でのみGoogle Cloud Storageを使用
+    # 本番環境（Cloud Run含む）でのみGoogle Cloud Storageを使用
     DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
     GS_BUCKET_NAME = "django_diary_bucket"
     GS_PROJECT_ID = "django-pra"
@@ -176,6 +197,13 @@ else:
     if gcp_key_path.exists():
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(gcp_key_path)
         GS_CREDENTIALS = None
+
+# Cloud Run でのセキュリティ設定
+if IS_CLOUD_RUN:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/diary"
